@@ -6,7 +6,7 @@ import Card from './Card';
 import { WithId } from 'mongodb';
 
 interface MemoryGameProps {
-  wordList: WithId<Word>[]; // Adjusted the type here
+  wordList: WithId<Word>[]; 
 }
 
 interface Word {

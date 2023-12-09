@@ -31,6 +31,10 @@ const Home: React.FC<HomeProps> = ({ isConnected, words }) => {
         </h2>
       )}
 
+
+<div className="text-red-800">
+  Hola a todos!
+</div>
       <div>
         <h2>Words from MongoDB:</h2>
         <MemoryGame wordList={words} />
@@ -38,6 +42,10 @@ const Home: React.FC<HomeProps> = ({ isConnected, words }) => {
     </div>
   );
 };
+
+
+
+
 
 export const getServerSideProps = async () => {
   try {
