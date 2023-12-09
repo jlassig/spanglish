@@ -1,38 +1,68 @@
-import Head from 'next/head'
-import clientPromise from '../lib/mongodb'
-import type { InferGetServerSidePropsType, GetServerSideProps } from 'next'
+import Head from 'next/head';
+import clientPromise from '../lib/mongodb';
+import type { InferGetServerSidePropsType, GetServerSideProps, GetServerSidePropsResult } from 'next';
+import { Collection, MongoClient, WithId, Document } from 'mongodb';
 
 type ConnectionStatus = {
-  isConnected: boolean
-}
+  isConnected: boolean;
+  words?: WithId<Document>[]; // Adjusted the type here
+};
 
-export const getServerSideProps: GetServerSideProps<
-  ConnectionStatus
-> = async () => {
+export const getServerSideProps: GetServerSideProps<ConnectionStatus> = async () => {
   try {
-    await clientPromise
-    // `await clientPromise` will use the default database passed in the MONGODB_URI
-    // However you can use another database (e.g. myDatabase) by replacing the `await clientPromise` with the following code:
-    //
-    // `const client = await clientPromise`
-    // `const db = client.db("myDatabase")`
-    //
-    // Then you can execute queries against your database like so:
-    // db.find({}) or any of the MongoDB Node Driver commands
+    const client = await clientPromise;
+    const db = client.db('spanglish');
+    const collection: Collection<WithId<Document>> = db.collection('WordList'); // Adjusted the type here
+    const words = await collection.find().toArray();
 
     return {
-      props: { isConnected: true },
-    }
+      props: { isConnected: true, words },
+    };
   } catch (e) {
-    console.error(e)
+    console.error(e);
     return {
       props: { isConnected: false },
-    }
+    };
   }
-}
+};
+
+// export const getServerSideProps: GetServerSideProps<
+//   ConnectionStatus
+// > = async () => {
+//   try {
+//     // await clientPromise
+//     // `await clientPromise` will use the default database passed in the MONGODB_URI
+//     // However you can use another database (e.g. myDatabase) by replacing the `await clientPromise` with the following code:
+//     //
+//     // `const client = await clientPromise`
+//     // `const db = client.db("myDatabase")`
+//     //
+//     // Then you can execute queries against your database like so:
+//     // db.find({}) or any of the MongoDB Node Driver commands
+
+//     const client = await clientPromise
+//     const db = client.db("spanglish")
+//     const collection = db.collection('WordList'); 
+//     const words = await collection.find().toArray();
+//     for (const word of words) {
+//       console.log(word);
+//     }
+
+//     return {
+//       // props: { isConnected: true },
+//       props: { isConnected: true, words },
+//     }
+//   } catch (e) {
+//     console.error(e)
+//     return {
+//       props: { isConnected: false },
+//     }
+//   }
+// }
 
 export default function Home({
   isConnected,
+  words,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   return (
     <div className="container">
@@ -54,6 +84,15 @@ export default function Home({
             for instructions.
           </h2>
         )}
+          <div>
+          <h2>Words from MongoDB:</h2>
+          <ul>
+            {words?.map((word) => (
+              <li key={String(word._id)}>{`${word.english} - ${word.spanish}`}</li>
+            ))}
+          </ul>
+        </div>
+
 
         <p className="description">
           Get started by editing <code>pages/index.js</code>
